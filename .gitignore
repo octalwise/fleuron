@@ -1,0 +1,16 @@
+# macos
+.DS_Store
+
+# dart and flutter
+*.g.dart
+/build/
+.pub-cache/
+.pub/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# android builds
+/android/app/debug
+/android/app/profile
+/android/app/release
