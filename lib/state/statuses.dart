@@ -61,8 +61,6 @@ class Statuses extends _$Statuses {
     }
 
     if (state.markRead.isNotEmpty) {
-      print(state.markRead.toList());
-
       await http.put(
         url,
         headers: {'X-Auth-Token': token},
