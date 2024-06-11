@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:fleuron/state/entries.dart';
 
@@ -29,7 +30,16 @@ class EntryView extends ConsumerWidget {
         appBar: AppBar(title: Text(entry.title)),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: SingleChildScrollView(child: Html(data: entry.content)),
+          child: SingleChildScrollView(
+            child: Html(
+              data: entry.content,
+              onLinkTap: (url, attributes, element) {
+                if (url != null) {
+                  launchUrl(Uri.parse(url));
+                }
+              },
+            )
+          ),
         ),
         floatingActionButton: FloatingActionButton(
           child: Icon(
