@@ -64,7 +64,7 @@ class FeedsList extends ConsumerWidget {
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: currentTab,
-        onDestinationSelected: (int index) {
+        onDestinationSelected: (index) {
           ref.read(currentTabProvider.notifier).selectTab(index);
         },
         destinations: const [
