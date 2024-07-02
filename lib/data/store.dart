@@ -24,7 +24,7 @@ class Store {
   final DateTime    lastFetched;
 
   static Future<File> get dataFile async {
-    var documentsPath = (await getApplicationDocumentsDirectory()).path;
+    final documentsPath = (await getApplicationDocumentsDirectory()).path;
     return File(path.join(documentsPath, 'data.json'));
   }
 
@@ -37,21 +37,21 @@ class Store {
   factory Store.fromJson(Map<String, dynamic> json) => _$StoreFromJson(json);
 
   static Future<Store?> fromPersisted() async {
-    var file   = await dataFile;
-    var exists = await file.exists();
+    final file   = await dataFile;
+    final exists = await file.exists();
 
     if (!exists) {
       return null;
     }
 
-    var data = await file.readAsString();
+    final data = await file.readAsString();
     return Store.fromJson(json.decode(data));
   }
 
   Future persist() async {
-    var file = await dataFile;
+    final file = await dataFile;
 
-    var data = json.encode(toJson());
+    final data = json.encode(toJson());
     file.writeAsString(data);
   }
 
@@ -59,10 +59,10 @@ class Store {
 }
 
 Future refreshStore(WidgetRef ref) async {
-  var store = await Store.fromPersisted();
+  final store = await Store.fromPersisted();
 
-  var entries = await getEntries(store, ref);
-  var feeds   = store != null ? store.feeds : await getFeeds();
+  final entries = await getEntries(store, ref);
+  final feeds   = store != null ? store.feeds : await getFeeds();
 
   ref.read(entriesProvider.notifier).setEntries(entries);
   ref.read(feedsProvider.notifier).setFeeds(feeds);
@@ -75,12 +75,12 @@ Future refreshStore(WidgetRef ref) async {
 }
 
 Future<List<Entry>> getEntries(Store? store, WidgetRef ref) async {
-  var after =
+  final after =
     store == null
       ? DateTime.fromMillisecondsSinceEpoch(0)
       : store.lastFetched;
 
-  var url = Uri.https(
+  final url = Uri.https(
     'reader.miniflux.app', '/v1/entries',
     {
       'limit': '100',
@@ -89,21 +89,21 @@ Future<List<Entry>> getEntries(Store? store, WidgetRef ref) async {
     },
   );
 
-  var token = const String.fromEnvironment('TOKEN');
+  final token = const String.fromEnvironment('TOKEN');
 
-  var res  = await http.get(url, headers: {'X-Auth-Token': token});
-  var data = json.decode(utf8.decode(res.bodyBytes))['entries'];
+  final res  = await http.get(url, headers: {'X-Auth-Token': token});
+  final data = json.decode(utf8.decode(res.bodyBytes))['entries'];
 
-  var entries = List<Entry>.from(
+  final entries = List<Entry>.from(
     data.map((data) => Entry.fromJson(data)),
   );
 
-  var curEntries = ref.read(entriesProvider);
+  final curEntries = ref.read(entriesProvider);
 
   if (curEntries.isNotEmpty || store != null) {
-    var ids = entries.map((entry) => entry.id).toSet();
+    final ids = entries.map((entry) => entry.id).toSet();
 
-    var oldEntries =
+    final oldEntries =
       curEntries.isNotEmpty ? curEntries : store!.entries;
 
     for (final entry in oldEntries) {
@@ -119,13 +119,13 @@ Future<List<Entry>> getEntries(Store? store, WidgetRef ref) async {
 }
 
 Future<List<Feed>> getFeeds() async {
-  var token = const String.fromEnvironment('TOKEN');
+  final token = const String.fromEnvironment('TOKEN');
 
-  var res = await http.get(
+  final res = await http.get(
     Uri.https('reader.miniflux.app', '/v1/feeds'),
     headers: {'X-Auth-Token': token},
   );
 
-  var data = json.decode(utf8.decode(res.bodyBytes));
+  final data = json.decode(utf8.decode(res.bodyBytes));
   return List<Feed>.from(data.map((data) => Feed.fromJson(data)));
 }

@@ -44,8 +44,8 @@ class Statuses extends _$Statuses {
   }
 
   Future refresh() async {
-    var url   = Uri.https('reader.miniflux.app', '/v1/entries');
-    var token = const String.fromEnvironment('TOKEN');
+    final url   = Uri.https('reader.miniflux.app', '/v1/entries');
+    final token = const String.fromEnvironment('TOKEN');
 
     if (state.markUnread.isNotEmpty) {
       await http.put(

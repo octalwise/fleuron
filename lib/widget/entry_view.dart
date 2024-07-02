@@ -14,13 +14,13 @@ class EntryView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    var entry = ref.read(entriesProvider.notifier).getEntry(entryID);
+    final entry = ref.read(entriesProvider.notifier).getEntry(entryID);
 
     ref.watch(entriesProvider);
 
-    var queryData = MediaQueryData.fromView(View.of(context));
+    final queryData = MediaQueryData.fromView(View.of(context));
 
-    var scalerData = queryData.copyWith(
+    final scalerData = queryData.copyWith(
       textScaler: const TextScaler.linear(1.2),
     );
 

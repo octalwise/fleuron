@@ -48,14 +48,14 @@ class Entries extends _$Entries {
   }
 
   void toggleRead(int entryID) {
-    var entry = state.firstWhere((entry) => entry.id == entryID);
+    final entry = state.firstWhere((entry) => entry.id == entryID);
 
     entry.status =
       entry.status == EntryStatus.unread
         ? EntryStatus.read
         : EntryStatus.unread;
 
-    var statuses = ref.read(statusesProvider.notifier);
+    final statuses = ref.read(statusesProvider.notifier);
 
     if (entry.status == EntryStatus.unread) {
       statuses.markUnread(entry.id);
@@ -67,7 +67,7 @@ class Entries extends _$Entries {
   }
 
   void markRead(int entryID) {
-    var entry = state.firstWhere((entry) => entry.id == entryID);
+    final entry = state.firstWhere((entry) => entry.id == entryID);
 
     entry.status = EntryStatus.read;
     ref.read(statusesProvider.notifier).markRead(entry.id);
