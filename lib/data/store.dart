@@ -75,6 +75,8 @@ Future refreshStore(WidgetRef ref) async {
 }
 
 Future<List<Entry>> getEntries(Store? store, WidgetRef ref) async {
+  var entries = <Entry>[];
+
   final after =
     store == null
       ? DateTime.fromMillisecondsSinceEpoch(0)
@@ -91,31 +93,33 @@ Future<List<Entry>> getEntries(Store? store, WidgetRef ref) async {
 
   final token = const String.fromEnvironment('TOKEN');
 
-  final res  = await http.get(url, headers: {'X-Auth-Token': token});
-  final data = json.decode(utf8.decode(res.bodyBytes))['entries'];
+  try {
+    final res  = await http.get(url, headers: {'X-Auth-Token': token});
+    final data = json.decode(utf8.decode(res.bodyBytes))['entries'];
 
-  final entries = List<Entry>.from(
-    data.map((data) => Entry.fromJson(data)),
-  );
+    entries = List<Entry>.from(
+      data.map((data) => Entry.fromJson(data)),
+    );
+  } finally {
+    final curEntries = ref.read(entriesProvider);
 
-  final curEntries = ref.read(entriesProvider);
+    if (curEntries.isNotEmpty || store != null) {
+      final ids = entries.map((entry) => entry.id).toSet();
 
-  if (curEntries.isNotEmpty || store != null) {
-    final ids = entries.map((entry) => entry.id).toSet();
+      final oldEntries =
+        curEntries.isNotEmpty ? curEntries : store!.entries;
 
-    final oldEntries =
-      curEntries.isNotEmpty ? curEntries : store!.entries;
-
-    for (final entry in oldEntries) {
-      if (!ids.contains(entry.id)) {
-        entries.add(entry);
+      for (final entry in oldEntries) {
+        if (!ids.contains(entry.id)) {
+          entries.add(entry);
+        }
       }
     }
+
+    ref.read(statusesProvider.notifier).modifyStatuses(entries);
+
+    return entries;
   }
-
-  ref.read(statusesProvider.notifier).modifyStatuses(entries);
-
-  return entries;
 }
 
 Future<List<Feed>> getFeeds() async {
