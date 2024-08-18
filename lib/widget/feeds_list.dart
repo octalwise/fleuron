@@ -25,41 +25,40 @@ class FeedsList extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Feeds')),
-      body: ListView.separated(
-        itemCount: feeds.length + 1,
-        itemBuilder: (context, index) {
-          if (index == 0) {
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: FilledButton.tonal(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const EntriesList(feedID: -1),
-                    ),
-                  );
-                },
-                child: Text(
-                  'All Entries (${ref.read(entriesProvider.notifier).fromFeed(-1).length})',
-                  style: const TextStyle(fontSize: 16),
+      body: RefreshIndicator(
+        child: ListView.separated(
+          itemCount: feeds.length + 1,
+          itemBuilder: (context, index) {
+            if (index == 0) {
+              return Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: FilledButton.tonal(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const EntriesList(feedID: -1),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    'All Entries (${ref.read(entriesProvider.notifier).fromFeed(-1).length})',
+                    style: const TextStyle(fontSize: 16),
+                  ),
                 ),
-              ),
-            );
-          }
+              );
+            }
 
-          Feed feed = feeds[index - 1];
+            Feed feed = feeds[index - 1];
 
-          return FeedTile(feedID: feed.id);
-        },
-        separatorBuilder: (context, index) {
-          return const Divider(height: 1);
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.refresh),
-        onPressed: () {
-          refreshStore(ref);
-          ref.read(statusesProvider.notifier).refresh();
+            return FeedTile(feedID: feed.id);
+          },
+          separatorBuilder: (context, index) {
+            return const Divider(height: 1);
+          },
+        ),
+        onRefresh: () async {
+          await refreshStore(ref);
+          await ref.read(statusesProvider.notifier).refresh();
         },
       ),
       bottomNavigationBar: NavigationBar(
