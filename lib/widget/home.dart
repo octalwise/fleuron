@@ -21,10 +21,16 @@ class Home extends ConsumerWidget {
           theme: ThemeData(
             brightness: Brightness.light,
             colorScheme: lightDynamic,
+            navigationBarTheme: NavigationBarThemeData(
+              surfaceTintColor: lightDynamic?.surfaceTint
+            ),
           ),
           darkTheme: ThemeData(
             brightness: Brightness.dark,
             colorScheme: darkDynamic,
+            navigationBarTheme: NavigationBarThemeData(
+              surfaceTintColor: darkDynamic?.surfaceTint
+            ),
           ),
 
           home: const FeedsList(),
