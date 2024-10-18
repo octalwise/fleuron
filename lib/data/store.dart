@@ -85,7 +85,7 @@ Future<List<Entry>> getEntries(Store? store, WidgetRef ref) async {
   final url = Uri.https(
     'reader.miniflux.app', '/v1/entries',
     {
-      'limit': '100',
+      'limit': '150',
       'changed_after': (after.millisecondsSinceEpoch / 1000).toStringAsFixed(0),
       'direction': 'desc',
     },
