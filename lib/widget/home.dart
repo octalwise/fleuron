@@ -22,14 +22,14 @@ class Home extends ConsumerWidget {
             brightness: Brightness.light,
             colorScheme: lightDynamic,
             navigationBarTheme: NavigationBarThemeData(
-              surfaceTintColor: lightDynamic?.surfaceTint
+              surfaceTintColor: lightDynamic?.surfaceTint,
             ),
           ),
           darkTheme: ThemeData(
             brightness: Brightness.dark,
             colorScheme: darkDynamic,
             navigationBarTheme: NavigationBarThemeData(
-              surfaceTintColor: darkDynamic?.surfaceTint
+              surfaceTintColor: darkDynamic?.surfaceTint,
             ),
           ),
 
