@@ -31,7 +31,7 @@ class FeedsList extends ConsumerWidget {
           itemBuilder: (context, index) {
             if (index == 0) {
               return Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16),
                 child: FilledButton.tonal(
                   child: Text(
                     'All Entries (${ref.read(entriesProvider.notifier).fromFeed(-1).length})',

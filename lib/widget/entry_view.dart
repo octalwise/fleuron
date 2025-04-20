@@ -29,7 +29,7 @@ class EntryView extends ConsumerWidget {
       child: Scaffold(
         appBar: AppBar(title: Text(entry.title)),
         body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: SingleChildScrollView(
             child: Html(
               data: entry.content,
