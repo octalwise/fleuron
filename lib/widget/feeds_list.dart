@@ -33,6 +33,10 @@ class FeedsList extends ConsumerWidget {
               return Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: FilledButton.tonal(
+                  child: Text(
+                    'All Entries (${ref.read(entriesProvider.notifier).fromFeed(-1).length})',
+                    style: const TextStyle(fontSize: 16),
+                  ),
                   onPressed: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -40,10 +44,6 @@ class FeedsList extends ConsumerWidget {
                       ),
                     );
                   },
-                  child: Text(
-                    'All Entries (${ref.read(entriesProvider.notifier).fromFeed(-1).length})',
-                    style: const TextStyle(fontSize: 16),
-                  ),
                 ),
               );
             }

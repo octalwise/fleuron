@@ -15,7 +15,7 @@ class Feeds extends _$Feeds {
 
   Feed getFeed(int feedID) {
     if (feedID == -1) {
-      return Feed(id: -1, title: "All");
+      return Feed(id: -1, title: 'All');
     } else {
       return state.firstWhere((feed) => feed.id == feedID);
     }

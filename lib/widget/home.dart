@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 
@@ -14,6 +15,13 @@ class Home extends ConsumerWidget {
     refreshStore(ref);
     ref.read(statusesProvider.notifier).refresh();
 
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        systemNavigationBarColor: Colors.transparent,
+      ),
+    );
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
     return DynamicColorBuilder(
       builder: (lightDynamic, darkDynamic) {
         return MaterialApp(
@@ -24,12 +32,22 @@ class Home extends ConsumerWidget {
             navigationBarTheme: NavigationBarThemeData(
               surfaceTintColor: lightDynamic?.surfaceTint,
             ),
+            pageTransitionsTheme: const PageTransitionsTheme(
+              builders: {
+                TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+              },
+            ),
           ),
           darkTheme: ThemeData(
             brightness: Brightness.dark,
             colorScheme: darkDynamic,
             navigationBarTheme: NavigationBarThemeData(
               surfaceTintColor: darkDynamic?.surfaceTint,
+            ),
+            pageTransitionsTheme: const PageTransitionsTheme(
+              builders: {
+                TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+              },
             ),
           ),
 
