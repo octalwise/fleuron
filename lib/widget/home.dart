@@ -50,7 +50,6 @@ class Home extends ConsumerWidget {
               },
             ),
           ),
-
           home: const FeedsList(),
         );
       },

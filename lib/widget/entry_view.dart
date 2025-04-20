@@ -36,14 +36,14 @@ class EntryView extends ConsumerWidget {
               style: {
                 'a': Style(
                   textDecoration: TextDecoration.none,
-                )
+                ),
               },
               onLinkTap: (url, attributes, element) {
                 if (url != null) {
                   launchUrl(Uri.parse(url));
                 }
               },
-            )
+            ),
           ),
         ),
         floatingActionButton: FloatingActionButton(
@@ -56,7 +56,7 @@ class EntryView extends ConsumerWidget {
             ref.read(entriesProvider.notifier).toggleRead(entry.id);
           },
         ),
-      )
+      ),
     );
   }
 }
