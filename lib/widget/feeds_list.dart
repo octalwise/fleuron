@@ -24,37 +24,46 @@ class FeedsList extends ConsumerWidget {
     ref.watch(statusesProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Feeds')),
       body: RefreshIndicator(
-        child: ListView.separated(
-          itemCount: feeds.length + 1,
-          itemBuilder: (context, index) {
-            if (index == 0) {
-              return Padding(
-                padding: const EdgeInsets.all(16),
-                child: FilledButton.tonal(
-                  child: Text(
-                    'All Entries (${ref.read(entriesProvider.notifier).fromFeed(-1).length})',
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const EntriesList(feedID: -1),
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              expandedHeight: 150.0,
+              automaticallyImplyLeading: false,
+              flexibleSpace: FlexibleSpaceBar(
+                title: Text('Feeds'),
+                titlePadding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
+              ),
+            ),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                childCount: feeds.length + 1,
+                (context, index) {
+                  if (index == 0) {
+                    return Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: FilledButton.tonal(
+                        child: Text(
+                          'All Entries (${ref.read(entriesProvider.notifier).fromFeed(-1).length})',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const EntriesList(feedID: -1),
+                            ),
+                          );
+                        },
                       ),
                     );
-                  },
-                ),
-              );
-            }
+                  }
 
-            Feed feed = feeds[index - 1];
-
-            return FeedTile(feedID: feed.id);
-          },
-          separatorBuilder: (context, index) {
-            return const Divider(height: 1);
-          },
+                  Feed feed = feeds[index - 1];
+                  return FeedTile(feedID: feed.id);
+                },
+              ),
+            ),
+          ],
         ),
         onRefresh: () async {
           await refreshStore(ref);
