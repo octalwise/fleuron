@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -14,9 +15,8 @@ class EntryView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final entry = ref.read(entriesProvider.notifier).getEntry(entryID);
-
     ref.watch(entriesProvider);
+    final entry = ref.read(entriesProvider.notifier).getEntry(entryID);
 
     final queryData = MediaQueryData.fromView(View.of(context));
 
@@ -44,8 +44,6 @@ class EntryView extends ConsumerWidget {
                 child: GestureDetector(
                   child: Text(entry.title, style: Theme.of(context).textTheme.headlineSmall),
                   onTap: () {
-                    print(entry.url);
-
                     if (entry.url != null) {
                       launchUrl(Uri.parse(entry.url!));
                     }
