@@ -100,26 +100,27 @@ Future<List<Entry>> getEntries(Store? store, WidgetRef ref) async {
     entries = List<Entry>.from(
       data.map((data) => Entry.fromJson(data)),
     );
-  } finally {
-    final curEntries = ref.read(entriesProvider);
+  } catch (_) {}
 
-    if (curEntries.isNotEmpty || store != null) {
-      final ids = entries.map((entry) => entry.id).toSet();
+  final curEntries = ref.read(entriesProvider);
 
-      final oldEntries =
+  if (curEntries.isNotEmpty || store != null) {
+    final ids = entries.map((entry) => entry.id).toSet();
+
+    final oldEntries =
         curEntries.isNotEmpty ? curEntries : store!.entries;
 
-      for (final entry in oldEntries) {
-        if (!ids.contains(entry.id)) {
-          entries.add(entry);
-        }
+    for (final entry in oldEntries) {
+      if (!ids.contains(entry.id)) {
+        entries.add(entry);
       }
     }
-
-    ref.read(statusesProvider.notifier).modifyStatuses(entries);
-
-    return entries;
   }
+
+  ref.read(statusesProvider.notifier).modifyStatuses(entries);
+
+  return entries;
+
 }
 
 Future<List<Feed>> getFeeds() async {

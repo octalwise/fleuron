@@ -14,6 +14,7 @@ enum EntryStatus {
 class Entry {
   final int id;
   final String title;
+  final String? url;
   final String content;
   final bool starred;
   EntryStatus status;
@@ -25,6 +26,7 @@ class Entry {
   Entry({
     required this.id,
     required this.title,
+    required this.url,
     required this.content,
     required this.starred,
     required this.status,

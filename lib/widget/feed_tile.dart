@@ -15,8 +15,8 @@ class FeedTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final entries = ref.read(entriesProvider.notifier).fromFeed(feedID);
     final feed    = ref.read(feedsProvider.notifier).getFeed(feedID);
+    final entries = ref.read(entriesProvider.notifier).fromFeed(feedID);
 
     return Opacity(
       opacity: entries.where(

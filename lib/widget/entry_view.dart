@@ -26,31 +26,50 @@ class EntryView extends ConsumerWidget {
 
     return Scaffold(
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Column(
           children: [
-            SizedBox(height: 100),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(entry.title, style: Theme.of(context).textTheme.headlineSmall),
+            SafeArea(
+              child: Padding(
+                padding: EdgeInsets.all(4),
+                child: Align(
+                  alignment: Alignment.bottomLeft,
+                  child: BackButton(color: Theme.of(context).colorScheme.onSurface),
+                ),
               ),
             ),
-            MediaQuery(
-              data: scalerData,
-              child: Html(
-                data: entry.content,
-                style: {
-                  'a': Style(
-                    textDecoration: TextDecoration.none,
-                  ),
-                },
-                onLinkTap: (url, attributes, element) {
-                  if (url != null) {
-                    launchUrl(Uri.parse(url));
-                  }
-                },
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: GestureDetector(
+                  child: Text(entry.title, style: Theme.of(context).textTheme.headlineSmall),
+                  onTap: () {
+                    print(entry.url);
+
+                    if (entry.url != null) {
+                      launchUrl(Uri.parse(entry.url!));
+                    }
+                  },
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: MediaQuery(
+                data: scalerData,
+                child: Html(
+                  data: entry.content,
+                  style: {
+                    'a': Style(
+                      textDecoration: TextDecoration.none,
+                    ),
+                  },
+                  onLinkTap: (url, attributes, element) {
+                    if (url != null) {
+                      launchUrl(Uri.parse(url));
+                    }
+                  },
+                ),
               ),
             ),
           ],

@@ -17,8 +17,8 @@ class FeedsList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    List<Feed> feeds = ref.watch(feedsProvider);
     int currentTab   = ref.watch(currentTabProvider);
+    List<Feed> feeds = ref.watch(feedsProvider);
 
     ref.watch(entriesProvider);
     ref.watch(statusesProvider);
@@ -28,8 +28,7 @@ class FeedsList extends ConsumerWidget {
         child: CustomScrollView(
           slivers: [
             SliverAppBar(
-              expandedHeight: 150.0,
-              automaticallyImplyLeading: false,
+              expandedHeight: 150,
               flexibleSpace: FlexibleSpaceBar(
                 title: Text('Feeds'),
                 titlePadding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),

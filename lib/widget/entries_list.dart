@@ -15,8 +15,8 @@ class EntriesList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final entries = ref.read(entriesProvider.notifier).fromFeed(feedID);
     final feed    = ref.read(feedsProvider.notifier).getFeed(feedID);
+    final entries = ref.read(entriesProvider.notifier).fromFeed(feedID);
 
     ref.watch(entriesProvider);
 
@@ -24,12 +24,28 @@ class EntriesList extends ConsumerWidget {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 150.0,
-            automaticallyImplyLeading: false,
-            flexibleSpace: FlexibleSpaceBar(
-              title: Text(feed.title),
-              titlePadding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
-            ),
+            expandedHeight: 150,
+            flexibleSpace: LayoutBuilder(
+              builder: (BuildContext ctx, BoxConstraints constraints) {
+                final double max = 150 + MediaQuery.of(ctx).padding.top;
+                final double min = kToolbarHeight + MediaQuery.of(ctx).padding.top;
+
+                final double cur = constraints.maxHeight;
+
+                final double x = (
+                  1 - (cur - min) / (max - min)
+                ).clamp(0, 1);
+
+                return FlexibleSpaceBar(
+                  title: Text(feed.title),
+                  titlePadding: EdgeInsets.only(
+                    left:   16 + (56 - 16) * x,
+                    right:  16 + (56 - 16) * x,
+                    bottom: 8  + (14 - 8)  * x,
+                  ),
+                );
+              },
+            )
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate(
