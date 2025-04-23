@@ -47,31 +47,29 @@ class EntriesList extends ConsumerWidget {
               },
             )
           ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              childCount: entries.length,
-              (context, index) {
-                Entry entry = entries[index];
+          SliverList.builder(
+            itemCount: entries.length,
+            itemBuilder: (context, index) {
+              Entry entry = entries[index];
 
-                return Opacity(
-                  opacity: entry.status == EntryStatus.unread ? 1 : 0.5,
-                  child: ListTile(
-                    leading: CircleAvatar(child: entry.starred ? Icon(Icons.star) : Text(entry.feed.title[0])),
-                    title: Text(entry.title),
-                    subtitle: Text(entry.feed.title),
-                    onTap: () {
-                      ref.read(entriesProvider.notifier).markRead(entry.id);
+              return Opacity(
+                opacity: entry.status == EntryStatus.unread ? 1 : 0.5,
+                child: ListTile(
+                  leading: CircleAvatar(child: entry.starred ? Icon(Icons.star) : Text(entry.feed.title[0])),
+                  title: Text(entry.title),
+                  subtitle: Text(entry.feed.title),
+                  onTap: () {
+                    ref.read(entriesProvider.notifier).markRead(entry.id);
 
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => EntryView(entryID: entry.id),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => EntryView(entryID: entry.id),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
           ),
         ],
       ),
