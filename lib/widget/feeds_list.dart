@@ -7,10 +7,10 @@ import 'package:fleuron/state/current_tab.dart';
 import 'package:fleuron/state/statuses.dart';
 
 import 'package:fleuron/widget/entries_list.dart';
-import 'package:fleuron/widget/feed_tile.dart';
 
 import 'package:fleuron/data/store.dart';
 import 'package:fleuron/data/feed.dart';
+import 'package:fleuron/data/entry.dart';
 
 class FeedsList extends ConsumerWidget {
   const FeedsList({super.key});
@@ -88,6 +88,37 @@ class FeedsList extends ConsumerWidget {
             label: 'Starred'
           ),
         ],
+      ),
+    );
+  }
+}
+
+class FeedTile extends ConsumerWidget {
+  final int feedID;
+
+  const FeedTile({super.key, required this.feedID});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final feed    = ref.read(feedsProvider.notifier).getFeed(feedID);
+    final entries = ref.read(entriesProvider.notifier).fromFeed(feedID);
+
+    return Opacity(
+      opacity: entries.where(
+        (entry) => entry.status == EntryStatus.unread,
+      ).isNotEmpty ? 1 : 0.5,
+
+      child: ListTile(
+        leading: CircleAvatar(child: Text(feed.title[0])),
+        title: Text(feed.title),
+        subtitle: Text('${entries.length} Entries'),
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => EntriesList(feedID: feed.id),
+            ),
+          );
+        },
       ),
     );
   }
