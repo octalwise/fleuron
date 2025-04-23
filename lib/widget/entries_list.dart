@@ -45,7 +45,7 @@ class EntriesList extends ConsumerWidget {
                   ),
                 );
               },
-            )
+            ),
           ),
           SliverList.builder(
             itemCount: entries.length,
