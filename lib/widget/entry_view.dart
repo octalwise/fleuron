@@ -15,8 +15,8 @@ class EntryView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(entriesProvider);
     final entry = ref.read(entriesProvider.notifier).getEntry(entryID);
+    ref.watch(entriesProvider);
 
     final queryData = MediaQueryData.fromView(View.of(context));
 
