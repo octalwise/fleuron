@@ -17,7 +17,7 @@ class FeedsList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    int currentTab   = ref.watch(currentTabProvider);
+    int currentTab = ref.watch(currentTabProvider);
     List<Feed> feeds = ref.watch(feedsProvider);
 
     ref.watch(entriesProvider);
@@ -25,6 +25,10 @@ class FeedsList extends ConsumerWidget {
 
     return Scaffold(
       body: RefreshIndicator(
+        onRefresh: () async {
+          await refreshStore(ref);
+          await ref.read(statusesProvider.notifier).refresh();
+        },
         child: CustomScrollView(
           slivers: [
             SliverAppBar(
@@ -62,10 +66,6 @@ class FeedsList extends ConsumerWidget {
             ),
           ],
         ),
-        onRefresh: () async {
-          await refreshStore(ref);
-          await ref.read(statusesProvider.notifier).refresh();
-        },
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: currentTab,
@@ -74,18 +74,16 @@ class FeedsList extends ConsumerWidget {
         },
         destinations: const [
           NavigationDestination(
-            icon: Icon(Icons.inbox_outlined),
-            selectedIcon: Icon(Icons.inbox),
-            label: 'Unread'
+            icon: Icon(Icons.inbox_rounded),
+            label: 'Unread',
           ),
           NavigationDestination(
             icon: Icon(Icons.notes),
-            label: 'All'
+            label: 'All',
           ),
           NavigationDestination(
-            icon: Icon(Icons.star_border),
-            selectedIcon: Icon(Icons.star),
-            label: 'Starred'
+            icon: Icon(Icons.star_rounded),
+            label: 'Starred',
           ),
         ],
       ),
@@ -100,14 +98,15 @@ class FeedTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final feed    = ref.read(feedsProvider.notifier).getFeed(feedID);
+    final feed = ref.read(feedsProvider.notifier).getFeed(feedID);
     final entries = ref.read(entriesProvider.notifier).fromFeed(feedID);
 
-    return Opacity(
-      opacity: entries.where(
-        (entry) => entry.status == EntryStatus.unread,
-      ).isNotEmpty ? 1 : 0.5,
+    final anyUnread = entries.where(
+      (entry) => entry.status == EntryStatus.unread,
+    ).isNotEmpty;
 
+    return Opacity(
+      opacity: anyUnread ? 1 : 0.5,
       child: ListTile(
         leading: CircleAvatar(child: Text(feed.title[0])),
         title: Text(feed.title),

@@ -9,7 +9,7 @@ part 'statuses.g.dart';
 
 class StatusesState {
   Set<int> markUnread = {};
-  Set<int> markRead   = {};
+  Set<int> markRead = {};
 }
 
 @riverpod

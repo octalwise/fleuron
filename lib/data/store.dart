@@ -37,7 +37,7 @@ class Store {
   factory Store.fromJson(Map<String, dynamic> json) => _$StoreFromJson(json);
 
   static Future<Store?> fromPersisted() async {
-    final file   = await dataFile;
+    final file = await dataFile;
     final exists = await file.exists();
 
     if (!exists) {
@@ -62,7 +62,7 @@ Future refreshStore(WidgetRef ref) async {
   final store = await Store.fromPersisted();
 
   final entries = await getEntries(store, ref);
-  final feeds   = store != null ? store.feeds : await getFeeds();
+  final feeds = store != null ? store.feeds : await getFeeds();
 
   ref.read(entriesProvider.notifier).setEntries(entries);
   ref.read(feedsProvider.notifier).setFeeds(feeds);
@@ -94,8 +94,8 @@ Future<List<Entry>> getEntries(Store? store, WidgetRef ref) async {
   final token = const String.fromEnvironment('TOKEN');
 
   try {
-    final res  = await http.get(url, headers: {'X-Auth-Token': token});
-    final data = json.decode(utf8.decode(res.bodyBytes))['entries'];
+    final res = await http.get(url, headers: {'X-Auth-Token': token});
+    final data = json.decode(res.body)['entries'];
 
     entries = List<Entry>.from(
       data.map((data) => Entry.fromJson(data)),
@@ -131,6 +131,6 @@ Future<List<Feed>> getFeeds() async {
     headers: {'X-Auth-Token': token},
   );
 
-  final data = json.decode(utf8.decode(res.bodyBytes));
+  final data = json.decode(res.body);
   return List<Feed>.from(data.map((data) => Feed.fromJson(data)));
 }
