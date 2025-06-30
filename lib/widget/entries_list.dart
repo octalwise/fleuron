@@ -15,7 +15,7 @@ class EntriesList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final feed    = ref.read(feedsProvider.notifier).getFeed(feedID);
+    final feed = ref.read(feedsProvider.notifier).getFeed(feedID);
     final entries = ref.read(entriesProvider.notifier).fromFeed(feedID);
 
     ref.watch(entriesProvider);
@@ -26,7 +26,7 @@ class EntriesList extends ConsumerWidget {
           SliverAppBar(
             expandedHeight: 150,
             flexibleSpace: LayoutBuilder(
-              builder: (BuildContext ctx, BoxConstraints constraints) {
+              builder: (ctx, constraints) {
                 final double max = 150 + MediaQuery.of(ctx).padding.top;
                 final double min = kToolbarHeight + MediaQuery.of(ctx).padding.top;
 
