@@ -1,4 +1,4 @@
-package com.example.fleuron
+package com.octalwise.fleuron
 
 import io.flutter.embedding.android.FlutterActivity
 
