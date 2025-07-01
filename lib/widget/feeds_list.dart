@@ -1,5 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:fleuron/data/store.dart';
+import 'package:fleuron/data/feed.dart';
+import 'package:fleuron/data/entry.dart';
 
 import 'package:fleuron/state/entries.dart';
 import 'package:fleuron/state/feeds.dart';
@@ -7,16 +12,34 @@ import 'package:fleuron/state/current_tab.dart';
 import 'package:fleuron/state/statuses.dart';
 
 import 'package:fleuron/widget/entries_list.dart';
+import 'package:fleuron/widget/token_input.dart';
 
-import 'package:fleuron/data/store.dart';
-import 'package:fleuron/data/feed.dart';
-import 'package:fleuron/data/entry.dart';
-
-class FeedsList extends ConsumerWidget {
+class FeedsList extends ConsumerStatefulWidget {
   const FeedsList({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FeedsList> createState() => FeedsListState();
+}
+
+class FeedsListState extends ConsumerState<FeedsList> {
+  @override
+  void initState() {
+    super.initState();
+
+    refreshStore(context, ref);
+
+    Timer.periodic(
+      Duration(minutes: 1),
+      (t) => ref.read(statusesProvider.notifier).refresh(),
+    );
+    Timer.periodic(
+      Duration(hours: 2),
+      (t) => refreshStore(context, ref),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     int currentTab = ref.watch(currentTabProvider);
     List<Feed> feeds = ref.watch(feedsProvider);
 
@@ -26,7 +49,7 @@ class FeedsList extends ConsumerWidget {
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: () async {
-          await refreshStore(ref);
+          await refreshStore(context, ref);
           await ref.read(statusesProvider.notifier).refresh();
         },
         child: CustomScrollView(
@@ -37,6 +60,17 @@ class FeedsList extends ConsumerWidget {
                 title: Text('Feeds'),
                 titlePadding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
               ),
+              actions: [
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  child: IconButton(
+                    icon: Icon(Icons.settings_rounded),
+                    onPressed: () {
+                      showTokenInput(context, ref);
+                    },
+                  ),
+                ),
+              ],
             ),
             SliverList.builder(
               itemCount: feeds.length + 1,

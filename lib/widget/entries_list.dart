@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fleuron/data/entry.dart';
+
 import 'package:fleuron/state/entries.dart';
 import 'package:fleuron/state/feeds.dart';
 
 import 'package:fleuron/widget/entry_view.dart';
-
-import 'package:fleuron/data/entry.dart';
 
 class EntriesList extends ConsumerWidget {
   final int feedID;

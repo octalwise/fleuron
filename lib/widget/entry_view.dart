@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:fleuron/state/entries.dart';
-
 import 'package:fleuron/data/entry.dart';
+
+import 'package:fleuron/state/entries.dart';
 
 class EntryView extends ConsumerWidget {
   final int entryID;

@@ -4,18 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:dynamic_color/dynamic_color.dart';
 
-import 'package:fleuron/state/statuses.dart';
 import 'package:fleuron/widget/feeds_list.dart';
-import 'package:fleuron/data/store.dart';
 
 class Home extends ConsumerWidget {
   const Home({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    refreshStore(ref);
-    ref.read(statusesProvider.notifier).refresh();
-
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         systemNavigationBarColor: Colors.transparent,

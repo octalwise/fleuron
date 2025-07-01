@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:http/http.dart' as http;
 
+import 'package:fleuron/data/store.dart';
 import 'package:fleuron/data/entry.dart';
 
 part 'statuses.g.dart';
@@ -44,13 +45,18 @@ class Statuses extends _$Statuses {
   }
 
   Future refresh() async {
-    final url   = Uri.https('reader.miniflux.app', '/v1/entries');
-    final token = const String.fromEnvironment('TOKEN');
+    final store = await Store.fromPersisted();
+
+    if (store == null) {
+      return;
+    }
+
+    final url = Uri.https('reader.miniflux.app', '/v1/entries');
 
     if (state.markUnread.isNotEmpty) {
       await http.put(
         url,
-        headers: {'X-Auth-Token': token},
+        headers: {'X-Auth-Token': store.token},
         body: json.encode({
           'entry_ids': state.markUnread.toList(),
           'status': 'unread',
@@ -63,7 +69,7 @@ class Statuses extends _$Statuses {
     if (state.markRead.isNotEmpty) {
       await http.put(
         url,
-        headers: {'X-Auth-Token': token},
+        headers: {'X-Auth-Token': store.token},
         body: json.encode({
           'entry_ids': state.markRead.toList(),
           'status': 'read',

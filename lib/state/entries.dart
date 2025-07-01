@@ -1,9 +1,9 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import 'package:fleuron/data/entry.dart';
+
 import 'package:fleuron/state/statuses.dart';
 import 'package:fleuron/state/current_tab.dart';
-
-import 'package:fleuron/data/entry.dart';
 
 part 'entries.g.dart';
 

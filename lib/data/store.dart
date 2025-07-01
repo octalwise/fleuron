@@ -1,34 +1,45 @@
 import 'dart:io';
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:http/http.dart' as http;
 
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+
 import 'package:json_annotation/json_annotation.dart';
+
+import 'package:fleuron/data/entry.dart';
+import 'package:fleuron/data/feed.dart';
 
 import 'package:fleuron/state/entries.dart';
 import 'package:fleuron/state/feeds.dart';
 import 'package:fleuron/state/statuses.dart';
 
-import 'package:fleuron/data/entry.dart';
-import 'package:fleuron/data/feed.dart';
+import 'package:fleuron/widget/token_input.dart';
 
 part 'store.g.dart';
 
 @JsonSerializable()
 class Store {
+  final String token;
+
   final List<Entry> entries;
-  final List<Feed>  feeds;
-  final DateTime    lastFetched;
+  final List<Feed> feeds;
+
+  final DateTime lastFetched;
 
   static Future<File> get dataFile async {
-    final documentsPath = (await getApplicationDocumentsDirectory()).path;
-    return File(path.join(documentsPath, 'data.json'));
+    final dir = await getApplicationDocumentsDirectory();
+    final docs = dir.path;
+
+    return File(path.join(docs, 'data.json'));
   }
 
   const Store({
+    required this.token,
     required this.entries,
     required this.feeds,
     required this.lastFetched,
@@ -49,34 +60,39 @@ class Store {
   }
 
   Future persist() async {
-    final file = await dataFile;
-
     final data = json.encode(toJson());
+
+    final file = await dataFile;
     file.writeAsString(data);
   }
 
   Map<String, dynamic> toJson() => _$StoreToJson(this);
 }
 
-Future refreshStore(WidgetRef ref) async {
+Future refreshStore(BuildContext context, WidgetRef ref, {String? token}) async {
   final store = await Store.fromPersisted();
+  final tok = token ?? store?.token;
 
-  final entries = await getEntries(store, ref);
-  final feeds = store != null ? store.feeds : await getFeeds();
+  if (tok == null) {
+    showTokenInput(context, ref, dismissable: false);
+    return;
+  }
+
+  final entries = await getEntries(store, tok, ref);
+  final feeds = store != null ? store.feeds : await getFeeds(tok);
 
   ref.read(entriesProvider.notifier).setEntries(entries);
   ref.read(feedsProvider.notifier).setFeeds(feeds);
 
   Store(
+    token: tok,
     entries: entries,
     feeds: feeds,
     lastFetched: DateTime.now(),
   ).persist();
 }
 
-Future<List<Entry>> getEntries(Store? store, WidgetRef ref) async {
-  var entries = <Entry>[];
-
+Future<List<Entry>> getEntries(Store? store, String token, WidgetRef ref) async {
   final after =
     store == null
       ? DateTime.fromMillisecondsSinceEpoch(0)
@@ -91,7 +107,7 @@ Future<List<Entry>> getEntries(Store? store, WidgetRef ref) async {
     },
   );
 
-  final token = const String.fromEnvironment('TOKEN');
+  var entries = <Entry>[];
 
   try {
     final res = await http.get(url, headers: {'X-Auth-Token': token});
@@ -123,9 +139,7 @@ Future<List<Entry>> getEntries(Store? store, WidgetRef ref) async {
 
 }
 
-Future<List<Feed>> getFeeds() async {
-  final token = const String.fromEnvironment('TOKEN');
-
+Future<List<Feed>> getFeeds(String token) async {
   final res = await http.get(
     Uri.https('reader.miniflux.app', '/v1/feeds'),
     headers: {'X-Auth-Token': token},
