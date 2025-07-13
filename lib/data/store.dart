@@ -111,7 +111,7 @@ Future<List<Entry>> getEntries(Store? store, String token, WidgetRef ref) async 
 
   try {
     final res = await http.get(url, headers: {'X-Auth-Token': token});
-    final data = json.decode(res.body)['entries'];
+    final data = json.decode(utf8.decode(res.bodyBytes))['entries'];
 
     entries = List<Entry>.from(
       data.map((data) => Entry.fromJson(data)),
@@ -145,6 +145,6 @@ Future<List<Feed>> getFeeds(String token) async {
     headers: {'X-Auth-Token': token},
   );
 
-  final data = json.decode(res.body);
+  final data = json.decode(utf8.decode(res.bodyBytes));
   return List<Feed>.from(data.map((data) => Feed.fromJson(data)));
 }
