@@ -60,6 +60,7 @@ class EntryView extends ConsumerWidget {
                   style: {
                     'a': Style(
                       textDecoration: TextDecoration.none,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   },
                   onLinkTap: (url, attributes, element) {
