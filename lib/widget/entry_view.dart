@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -8,14 +9,36 @@ import 'package:fleuron/data/entry.dart';
 
 import 'package:fleuron/state/entries.dart';
 
-class EntryView extends ConsumerWidget {
+class EntryView extends ConsumerStatefulWidget {
   final int entryID;
 
   const EntryView({super.key, required this.entryID});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final entry = ref.read(entriesProvider.notifier).getEntry(entryID);
+  EntryViewState createState() => EntryViewState();
+}
+
+class EntryViewState extends ConsumerState<EntryView> {
+  final controller = ScrollController();
+  var showFAB = true;
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller.addListener(() {
+      final dir = controller.position.userScrollDirection;
+      final show = dir == ScrollDirection.forward;
+
+      if (dir != ScrollDirection.idle && showFAB != show) {
+        setState(() => showFAB = show);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final entry = ref.read(entriesProvider.notifier).getEntry(widget.entryID);
     ref.watch(entriesProvider);
 
     final queryData = MediaQueryData.fromView(View.of(context));
@@ -26,6 +49,7 @@ class EntryView extends ConsumerWidget {
 
     return Scaffold(
       body: SingleChildScrollView(
+        controller: controller,
         child: Column(
           children: [
             SafeArea(
@@ -68,21 +92,38 @@ class EntryView extends ConsumerWidget {
                       launchUrl(Uri.parse(url));
                     }
                   },
+                  extensions: [
+                    OnImageTapExtension(
+                      onImageTap: (url, attributes, element) {
+                        if (url != null) {
+                          launchUrl(Uri.parse(url));
+                        }
+                      },
+                    ),
+                  ],
                 ),
               ),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(
-          entry.status == EntryStatus.unread
-            ? Icons.circle
-            : Icons.circle_outlined,
+      floatingActionButton: AnimatedSlide(
+        duration: const Duration(milliseconds: 200),
+        offset: showFAB ? Offset.zero : Offset(0, 2),
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 200),
+          opacity: showFAB ? 1 : 0,
+          child: FloatingActionButton(
+            child: Icon(
+              entry.status == EntryStatus.unread
+                ? Icons.circle
+                : Icons.circle_outlined,
+            ),
+            onPressed: () {
+              ref.read(entriesProvider.notifier).toggleRead(entry.id);
+            },
+          ),
         ),
-        onPressed: () {
-          ref.read(entriesProvider.notifier).toggleRead(entry.id);
-        },
       ),
     );
   }
