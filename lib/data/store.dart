@@ -69,6 +69,17 @@ class Store {
   Map<String, dynamic> toJson() => _$StoreToJson(this);
 }
 
+Future persistedState(WidgetRef ref) async {
+  final store = await Store.fromPersisted();
+
+  if (store == null) {
+    return;
+  }
+
+  ref.read(entriesProvider.notifier).setEntries(store.entries);
+  ref.read(feedsProvider.notifier).setFeeds(store.feeds);
+}
+
 Future refreshStore(BuildContext context, WidgetRef ref, {String? token}) async {
   final store = await Store.fromPersisted();
   final tok = token ?? store?.token;
@@ -79,7 +90,7 @@ Future refreshStore(BuildContext context, WidgetRef ref, {String? token}) async 
   }
 
   final entries = await getEntries(store, tok, ref);
-  final feeds = store != null ? store.feeds : await getFeeds(tok);
+  final feeds = await getFeeds(tok);
 
   ref.read(entriesProvider.notifier).setEntries(entries);
   ref.read(feedsProvider.notifier).setFeeds(feeds);

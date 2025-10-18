@@ -21,12 +21,14 @@ class Statuses extends _$Statuses {
   void markRead(int entryID) {
     if (!state.markUnread.remove(entryID)) {
       state.markRead.add(entryID);
+      refresh();
     }
   }
 
   void markUnread(int entryID) {
     if (!state.markRead.remove(entryID)) {
       state.markUnread.add(entryID);
+      refresh();
     }
   }
 
@@ -54,29 +56,33 @@ class Statuses extends _$Statuses {
     final url = Uri.https('reader.miniflux.app', '/v1/entries');
 
     if (state.markUnread.isNotEmpty) {
-      await http.put(
-        url,
-        headers: {'X-Auth-Token': store.token},
-        body: json.encode({
-          'entry_ids': state.markUnread.toList(),
-          'status': 'unread',
-        }),
-      );
+      try {
+        await http.put(
+          url,
+          headers: {'X-Auth-Token': store.token},
+          body: json.encode({
+            'entry_ids': state.markUnread.toList(),
+            'status': 'unread',
+          }),
+        );
 
-      state.markUnread = {};
+        state.markUnread = {};
+      } catch (e) {}
     }
 
     if (state.markRead.isNotEmpty) {
-      await http.put(
-        url,
-        headers: {'X-Auth-Token': store.token},
-        body: json.encode({
-          'entry_ids': state.markRead.toList(),
-          'status': 'read',
-        }),
-      );
+      try {
+        await http.put(
+          url,
+          headers: {'X-Auth-Token': store.token},
+          body: json.encode({
+            'entry_ids': state.markRead.toList(),
+            'status': 'read',
+          }),
+        );
 
-      state.markRead = {};
+        state.markRead = {};
+      } catch (e) {}
     }
   }
 }
