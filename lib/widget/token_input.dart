@@ -27,7 +27,7 @@ Future showTokenInput(BuildContext context, WidgetRef ref, {bool? dismissable}) 
       return StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            title: Text('Enter Miniflux info'),
+            title: Text('Enter Miniflux details'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
