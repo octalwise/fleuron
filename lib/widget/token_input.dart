@@ -28,28 +28,34 @@ Future showTokenInput(BuildContext context, WidgetRef ref, {bool? dismissable}) 
         builder: (context, setState) {
           return AlertDialog(
             title: Text('Enter Miniflux info'),
-            content: SizedBox(
-              width: double.maxFinite,
-              child: Rows(
-                children: [
-                  TextField(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: 6),
+                SizedBox(
+                  width: double.maxFinite,
+                  child: TextField(
                     controller: apiCtrl,
                     decoration: InputDecoration(
-                      hintText: 'API',
+                      labelText: 'API',
                       border: OutlineInputBorder(),
                       errorText: apiErr,
                     ),
                   ),
-                  TextField(
+                ),
+                SizedBox(height: 18),
+                SizedBox(
+                  width: double.maxFinite,
+                  child: TextField(
                     controller: tokenCtrl,
                     decoration: InputDecoration(
-                      hintText: 'Token',
+                      labelText: 'Token',
                       border: OutlineInputBorder(),
                       errorText: tokenErr,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
             actionsAlignment: MainAxisAlignment.spaceBetween,
             actions: [
@@ -93,17 +99,25 @@ Future showTokenInput(BuildContext context, WidgetRef ref, {bool? dismissable}) 
 }
 
 Future<bool> verifyAPI(String api) async {
-  final url = Uri.parse(api).resolve('readiness');
-  final res = await http.get(url);
+  try {
+    final url = Uri.parse(api).resolve('readiness');
+    final res = await http.get(url);
 
-  return res.statusCode == 200;
+    return res.statusCode == 200;
+  } catch (_) {
+    return false;
+  }
 }
 
 Future<bool> verifyToken(String api, String token) async {
-  final url = Uri.parse(api).resolve('v1/me');
-  final res = await http.get(url, headers: {'X-Auth-Token': token});
+  try {
+    final url = Uri.parse(api).resolve('v1/me');
+    final res = await http.get(url, headers: {'X-Auth-Token': token});
 
-  return res.statusCode == 200;
+    return res.statusCode == 200;
+  } catch (_) {
+    return false;
+  }
 }
 
 void showAboutDialog(BuildContext context) {

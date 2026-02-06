@@ -139,7 +139,7 @@ Future<List<Entry>> getEntries(Store? store, String api, String token, WidgetRef
     final ids = entries.map((entry) => entry.id).toSet();
 
     final oldEntries =
-        curEntries.isNotEmpty ? curEntries : store!.entries;
+      curEntries.isNotEmpty ? curEntries : store!.entries;
 
     for (final entry in oldEntries) {
       if (!ids.contains(entry.id)) {
@@ -151,7 +151,6 @@ Future<List<Entry>> getEntries(Store? store, String api, String token, WidgetRef
   ref.read(statusesProvider.notifier).modifyStatuses(entries);
 
   return entries;
-
 }
 
 Future<List<Feed>> getFeeds(String api, String token) async {
