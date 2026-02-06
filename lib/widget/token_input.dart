@@ -9,7 +9,11 @@ import 'package:fleuron/data/store.dart';
 
 Future showTokenInput(BuildContext context, WidgetRef ref, {bool? dismissable}) async {
   final store = await Store.fromPersisted();
-  final controller = TextEditingController(
+
+  final apiCtrl = TextEditingController(
+    text: store?.api ?? 'https://reader.miniflux.app',
+  );
+  final tokenCtrl = TextEditingController(
     text: store?.token ?? '',
   );
 
@@ -17,21 +21,34 @@ Future showTokenInput(BuildContext context, WidgetRef ref, {bool? dismissable}) 
     context: context,
     barrierDismissible: dismissable ?? true,
     builder: (context) {
-      String? error;
+      String? apiErr;
+      String? tokenErr;
 
       return StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            title: Text('Enter Miniflux token'),
+            title: Text('Enter Miniflux info'),
             content: SizedBox(
               width: double.maxFinite,
-              child: TextField(
-                controller: controller,
-                decoration: InputDecoration(
-                  hintText: 'Token',
-                  border: OutlineInputBorder(),
-                  errorText: error,
-                ),
+              child: Rows(
+                children: [
+                  TextField(
+                    controller: apiCtrl,
+                    decoration: InputDecoration(
+                      hintText: 'API',
+                      border: OutlineInputBorder(),
+                      errorText: apiErr,
+                    ),
+                  ),
+                  TextField(
+                    controller: tokenCtrl,
+                    decoration: InputDecoration(
+                      hintText: 'Token',
+                      border: OutlineInputBorder(),
+                      errorText: tokenErr,
+                    ),
+                  ),
+                ],
               ),
             ),
             actionsAlignment: MainAxisAlignment.spaceBetween,
@@ -43,14 +60,26 @@ Future showTokenInput(BuildContext context, WidgetRef ref, {bool? dismissable}) 
               TextButton(
                 child: Text('OK'),
                 onPressed: () async {
-                  final token = controller.text.trim();
+                  final api = apiCtrl.text.trim();
+                  final verified = api.isNotEmpty && await verifyAPI(api);
 
-                  if (token.isNotEmpty && await verifyToken(token)) {
-                    refreshStore(context, ref, token: token);
+                  setState(() {
+                    apiErr = verified ? null : 'Invalid API.';
+                    tokenErr = null;
+                  });
+
+                  if (!verified) {
+                    return;
+                  }
+
+                  final token = tokenCtrl.text.trim();
+
+                  if (token.isNotEmpty && await verifyToken(api, token)) {
+                    refreshStore(context, ref, api: api, token: token);
                     Navigator.of(context).pop();
                   } else {
                     setState(() {
-                      error = 'Invalid token.';
+                      tokenErr = 'Invalid token.';
                     });
                   }
                 },
@@ -63,14 +92,21 @@ Future showTokenInput(BuildContext context, WidgetRef ref, {bool? dismissable}) 
   );
 }
 
-Future<bool> verifyToken(String token) async {
-  final url = Uri.https('reader.miniflux.app', '/v1/me');
+Future<bool> verifyAPI(String api) async {
+  final url = Uri.parse(api).resolve('readiness');
+  final res = await http.get(url);
+
+  return res.statusCode == 200;
+}
+
+Future<bool> verifyToken(String api, String token) async {
+  final url = Uri.parse(api).resolve('v1/me');
   final res = await http.get(url, headers: {'X-Auth-Token': token});
 
   return res.statusCode == 200;
 }
 
-showAboutDialog(BuildContext context) {
+void showAboutDialog(BuildContext context) {
   final linkStyle =
     Theme.of(context).textTheme.bodyLarge!.copyWith(
       color: Theme.of(context).colorScheme.primary,

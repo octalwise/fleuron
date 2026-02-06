@@ -25,6 +25,7 @@ part 'store.g.dart';
 @JsonSerializable()
 class Store {
   final String token;
+  final String? api;
 
   final List<Entry> entries;
   final List<Feed> feeds;
@@ -40,6 +41,7 @@ class Store {
 
   const Store({
     required this.token,
+    required this.api,
     required this.entries,
     required this.feeds,
     required this.lastFetched,
@@ -80,7 +82,7 @@ Future persistedState(WidgetRef ref) async {
   ref.read(feedsProvider.notifier).setFeeds(store.feeds);
 }
 
-Future refreshStore(BuildContext context, WidgetRef ref, {String? token}) async {
+Future refreshStore(BuildContext context, WidgetRef ref, {String? api, String? token}) async {
   final store = await Store.fromPersisted();
   final tok = token ?? store?.token;
 
@@ -89,13 +91,16 @@ Future refreshStore(BuildContext context, WidgetRef ref, {String? token}) async 
     return;
   }
 
-  final entries = await getEntries(store, tok, ref);
-  final feeds = await getFeeds(tok);
+  final url = api ?? store?.api ?? 'https://reader.miniflux.app';
+
+  final entries = await getEntries(store, url, tok, ref);
+  final feeds = await getFeeds(url, tok);
 
   ref.read(entriesProvider.notifier).setEntries(entries);
   ref.read(feedsProvider.notifier).setFeeds(feeds);
 
   Store(
+    api: url,
     token: tok,
     entries: entries,
     feeds: feeds,
@@ -103,15 +108,14 @@ Future refreshStore(BuildContext context, WidgetRef ref, {String? token}) async 
   ).persist();
 }
 
-Future<List<Entry>> getEntries(Store? store, String token, WidgetRef ref) async {
+Future<List<Entry>> getEntries(Store? store, String api, String token, WidgetRef ref) async {
   final after =
     store == null
       ? DateTime.fromMillisecondsSinceEpoch(0)
       : store.lastFetched;
 
-  final url = Uri.https(
-    'reader.miniflux.app', '/v1/entries',
-    {
+  final url = Uri.parse(api).resolve('v1/entries').replace(
+    queryParameters: {
       'limit': '500',
       'changed_after': (after.millisecondsSinceEpoch / 1000).toStringAsFixed(0),
       'direction': 'desc',
@@ -150,9 +154,9 @@ Future<List<Entry>> getEntries(Store? store, String token, WidgetRef ref) async 
 
 }
 
-Future<List<Feed>> getFeeds(String token) async {
+Future<List<Feed>> getFeeds(String api, String token) async {
   final res = await http.get(
-    Uri.https('reader.miniflux.app', '/v1/feeds'),
+    Uri.parse(api).resolve('v1/feeds'),
     headers: {'X-Auth-Token': token},
   );
 

@@ -53,7 +53,7 @@ class Statuses extends _$Statuses {
       return;
     }
 
-    final url = Uri.https('reader.miniflux.app', '/v1/entries');
+    final url = Uri.parse(store.api ?? 'https://reader.miniflux.app').resolve('v1/entries');
 
     if (state.markUnread.isNotEmpty) {
       try {
