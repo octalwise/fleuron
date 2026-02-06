@@ -33,7 +33,7 @@ class Home extends ConsumerWidget {
             ),
             pageTransitionsTheme: const PageTransitionsTheme(
               builders: {
-                TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+                TargetPlatform.android: SlideBuilder(),
               },
             ),
           ),
@@ -44,13 +44,57 @@ class Home extends ConsumerWidget {
             ),
             pageTransitionsTheme: const PageTransitionsTheme(
               builders: {
-                TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+                TargetPlatform.android: SlideBuilder(),
               },
             ),
           ),
           home: const FeedsList(),
         );
       },
+    );
+  }
+}
+
+class SlideBuilder extends PageTransitionsBuilder {
+  const SlideBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    Curve push = Cubic(0.0, 0.0, 0.4, 1.0);
+    Curve pop = Cubic(0.4, 0.0, 1.0, 1.0);
+
+    final primary = CurvedAnimation(
+      parent: animation,
+      curve: push,
+      reverseCurve: pop,
+    );
+
+    final secondary = CurvedAnimation(
+      parent: secondaryAnimation,
+      curve: push,
+      reverseCurve: pop,
+    );
+
+    return SlideTransition(
+      position: Tween(
+        begin: const Offset(1, 0),
+        end: Offset.zero,
+      ).animate(primary),
+
+      child: SlideTransition(
+        position: Tween(
+          begin: Offset.zero,
+          end: const Offset(-0.25, 0),
+        ).animate(secondary),
+
+        child: child,
+      ),
     );
   }
 }
