@@ -26,7 +26,7 @@ class FeedsListState extends ConsumerState<FeedsList> {
   void initState() {
     super.initState();
 
-    persistedState(ref);
+    loadPersisted(ref);
     refreshStore(context, ref);
 
     Timer.periodic(

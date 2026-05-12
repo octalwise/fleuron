@@ -14,6 +14,7 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   flutter_riverpod: ^2.5.1
   http: ^1.2.1
+  http_auth: ^1.0.4
   json_annotation: ^4.9.0
   json_serializable: ^6.8.0
   path: ^1.9.0

@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:http/http.dart' as http;
 
 import 'package:fleuron/data/store.dart';
 import 'package:fleuron/data/entry.dart';
@@ -19,17 +18,15 @@ class Statuses extends _$Statuses {
   StatusesState build() => StatusesState();
 
   void markRead(int entryID) {
-    if (!state.markUnread.remove(entryID)) {
-      state.markRead.add(entryID);
-      refresh();
-    }
+    state.markUnread.remove(entryID);
+    state.markRead.add(entryID);
+    refresh();
   }
 
   void markUnread(int entryID) {
-    if (!state.markRead.remove(entryID)) {
-      state.markUnread.add(entryID);
-      refresh();
-    }
+    state.markRead.remove(entryID);
+    state.markUnread.add(entryID);
+    refresh();
   }
 
   void modifyStatuses(List<Entry> entries) {
@@ -53,13 +50,19 @@ class Statuses extends _$Statuses {
       return;
     }
 
-    final url = Uri.parse(store.api ?? 'https://reader.miniflux.app').resolve('v1/entries');
+    final api = store.api ?? 'https://reader.miniflux.app';
+
+    final meta = Meta(
+      api: api,
+      token: store.token,
+      username: store.username,
+      password: store.password,
+    );
 
     if (state.markUnread.isNotEmpty) {
       try {
-        await http.put(
-          url,
-          headers: {'X-Auth-Token': store.token},
+        await meta.put(
+          'v1/entries',
           body: json.encode({
             'entry_ids': state.markUnread.toList(),
             'status': 'unread',
@@ -72,9 +75,8 @@ class Statuses extends _$Statuses {
 
     if (state.markRead.isNotEmpty) {
       try {
-        await http.put(
-          url,
-          headers: {'X-Auth-Token': store.token},
+        await meta.put(
+          'v1/entries',
           body: json.encode({
             'entry_ids': state.markRead.toList(),
             'status': 'read',

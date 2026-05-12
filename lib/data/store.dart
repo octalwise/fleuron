@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:http_auth/http_auth.dart' as http_auth;
 
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -24,8 +25,11 @@ part 'store.g.dart';
 
 @JsonSerializable()
 class Store {
-  final String token;
   final String? api;
+  final String token;
+
+  final String? username;
+  final String? password;
 
   final List<Entry> entries;
   final List<Feed> feeds;
@@ -40,8 +44,12 @@ class Store {
   }
 
   const Store({
-    required this.token,
     required this.api,
+    required this.token,
+
+    required this.username,
+    required this.password,
+
     required this.entries,
     required this.feeds,
     required this.lastFetched,
@@ -65,13 +73,42 @@ class Store {
     final data = json.encode(toJson());
 
     final file = await dataFile;
-    file.writeAsString(data);
+    await file.writeAsString(data);
   }
 
   Map<String, dynamic> toJson() => _$StoreToJson(this);
 }
 
-Future persistedState(WidgetRef ref) async {
+class Meta {
+  final String api;
+  final String token;
+  final String? username;
+  final String? password;
+
+  late final http.Client client =
+    username != null && password != null
+      ? http_auth.NegotiateAuthClient(username!, password!)
+      : http.Client();
+
+  Meta({
+    required this.api,
+    required this.token,
+    required this.username,
+    required this.password,
+  });
+
+  Future<http.Response> get(String path, {Map<String, String>? query}) async {
+    Uri url = Uri.parse(api).resolve(path).replace(queryParameters: query);
+    return client.get(url, headers: {'X-Auth-Token': token});
+  }
+
+  Future<http.Response> put(String path, {Object? body}) async {
+    final url = Uri.parse(api).resolve(path);
+    return client.put(url, headers: {'X-Auth-Token': token}, body: body);
+  }
+}
+
+Future loadPersisted(WidgetRef ref) async {
   final store = await Store.fromPersisted();
 
   if (store == null) {
@@ -82,50 +119,62 @@ Future persistedState(WidgetRef ref) async {
   ref.read(feedsProvider.notifier).setFeeds(store.feeds);
 }
 
-Future refreshStore(BuildContext context, WidgetRef ref, {String? api, String? token}) async {
+Future refreshStore(
+  BuildContext context,
+  WidgetRef ref,
+  {Meta? update}
+) async {
   final store = await Store.fromPersisted();
-  final tok = token ?? store?.token;
+  final token = update?.token ?? store?.token;
 
-  if (tok == null) {
+  if (token == null) {
     showTokenInput(context, ref, dismissable: false);
     return;
   }
 
-  final url = api ?? store?.api ?? 'https://reader.miniflux.app';
+  final api = update?.api ?? store?.api ?? 'https://reader.miniflux.app';
 
-  final entries = await getEntries(store, url, tok, ref);
-  final feeds = await getFeeds(url, tok);
+  final username = update != null ? update.username : store?.username;
+  final password = update != null ? update.password : store?.password;
+
+  final meta = Meta(
+    api: api,
+    token: token,
+    username: username,
+    password: password
+  );
+
+  final entries = await getEntries(store, meta, ref);
+  final feeds = await getFeeds(meta);
 
   ref.read(entriesProvider.notifier).setEntries(entries);
   ref.read(feedsProvider.notifier).setFeeds(feeds);
 
-  Store(
-    api: url,
-    token: tok,
+  await Store(
+    api: api,
+    token: token,
+    username: username,
+    password: password,
     entries: entries,
     feeds: feeds,
     lastFetched: DateTime.now(),
   ).persist();
 }
 
-Future<List<Entry>> getEntries(Store? store, String api, String token, WidgetRef ref) async {
+Future<List<Entry>> getEntries(Store? store, Meta meta, WidgetRef ref) async {
   final after =
     store == null
       ? DateTime.fromMillisecondsSinceEpoch(0)
       : store.lastFetched;
 
-  final url = Uri.parse(api).resolve('v1/entries').replace(
-    queryParameters: {
-      'limit': '500',
-      'changed_after': (after.millisecondsSinceEpoch / 1000).toStringAsFixed(0),
-      'direction': 'desc',
-    },
-  );
-
   var entries = <Entry>[];
 
   try {
-    final res = await http.get(url, headers: {'X-Auth-Token': token});
+    final res = await meta.get('v1/entries', query: {
+      'limit': '500',
+      'changed_after': (after.millisecondsSinceEpoch / 1000).toStringAsFixed(0),
+      'direction': 'desc',
+    });
     final data = json.decode(utf8.decode(res.bodyBytes))['entries'];
 
     entries = List<Entry>.from(
@@ -153,12 +202,9 @@ Future<List<Entry>> getEntries(Store? store, String api, String token, WidgetRef
   return entries;
 }
 
-Future<List<Feed>> getFeeds(String api, String token) async {
-  final res = await http.get(
-    Uri.parse(api).resolve('v1/feeds'),
-    headers: {'X-Auth-Token': token},
-  );
-
+Future<List<Feed>> getFeeds(Meta meta) async {
+  final res = await meta.get('v1/feeds');
   final data = json.decode(utf8.decode(res.bodyBytes));
+
   return List<Feed>.from(data.map((data) => Feed.fromJson(data)));
 }
