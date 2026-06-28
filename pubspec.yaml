@@ -1,6 +1,6 @@
 name: fleuron
 description: Android client for Miniflux
-version: 1.0.2+5
+version: 1.0.3+6
 publish_to: none
 
 environment:
