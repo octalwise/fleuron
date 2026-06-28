@@ -100,6 +100,16 @@ class EntryViewState extends ConsumerState<EntryView> {
                         }
                       },
                     ),
+                    TagExtension(
+                      tagsToExtend: {"img"},
+                      builder: (context) {
+                        return Image.network(
+                          context.attributes['src'] ?? '',
+                          width: MediaQuery.of(context.buildContext!).size.width,
+                          fit: BoxFit.fitWidth,
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
