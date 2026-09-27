@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fleuron/data/store.dart';
@@ -22,6 +23,9 @@ class FeedsList extends ConsumerStatefulWidget {
 }
 
 class FeedsListState extends ConsumerState<FeedsList> {
+  var refreshKey = UniqueKey();
+  final stackKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
@@ -47,59 +51,70 @@ class FeedsListState extends ConsumerState<FeedsList> {
     ref.watch(entriesProvider);
     ref.watch(statusesProvider);
 
+
     return Scaffold(
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await refreshStore(context, ref);
-          await ref.read(statusesProvider.notifier).refresh();
+      body: NotificationListener<UserScrollNotification>(
+        onNotification: (n) {
+          if (n.direction == ScrollDirection.reverse && n.metrics.extentBefore == 0) {
+            setState(() => refreshKey = UniqueKey());
+          }
+          return false;
         },
-        child: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              expandedHeight: 150,
-              flexibleSpace: FlexibleSpaceBar(
-                title: Text('Feeds'),
-                titlePadding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
-              ),
-              actions: [
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8),
-                  child: IconButton(
-                    icon: Icon(Icons.settings_rounded),
-                    onPressed: () {
-                      showTokenInput(context, ref);
-                    },
-                  ),
+        child: RefreshIndicator(
+          key: refreshKey,
+          onRefresh: () async {
+            await refreshStore(context, ref);
+            await ref.read(statusesProvider.notifier).refresh();
+          },
+          child: CustomScrollView(
+            key: stackKey,
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 150,
+                flexibleSpace: FlexibleSpaceBar(
+                  title: Text('Feeds'),
+                  titlePadding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
                 ),
-              ],
-            ),
-            SliverList.builder(
-              itemCount: feeds.length + 1,
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: FilledButton.tonal(
-                      child: Text(
-                        'All Entries (${ref.read(entriesProvider.notifier).fromFeed(-1).length})',
-                        style: const TextStyle(fontSize: 16),
-                      ),
+                actions: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8),
+                    child: IconButton(
+                      icon: Icon(Icons.settings_rounded),
                       onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const EntriesList(feedID: -1),
-                          ),
-                        );
+                        showTokenInput(context, ref);
                       },
                     ),
-                  );
-                }
+                  ),
+                ],
+              ),
+              SliverList.builder(
+                itemCount: feeds.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: FilledButton.tonal(
+                        child: Text(
+                          'All Entries (${ref.read(entriesProvider.notifier).fromFeed(-1).length})',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const EntriesList(feedID: -1),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  }
 
-                Feed feed = feeds[index - 1];
-                return FeedTile(feedID: feed.id);
-              },
-            ),
-          ],
+                  Feed feed = feeds[index - 1];
+                  return FeedTile(feedID: feed.id);
+                },
+              ),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: NavigationBar(
